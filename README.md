@@ -58,3 +58,5 @@ $ python3.6 path/to/resource/flaskapi.py
 $ export FLASK_APP=flaskapi.py
 $ flask run
 ```
+# Modifier le fichier de configuration de l'API:
+**Obligatoire, l'accès à la database sera impossible sinon. modifier [config.py](./resource/config.py) **
