@@ -24,7 +24,7 @@ Type "help", "copyright", "credits" or "license" for more information.
  ```
 * Sinon, il faut l'installer avec : 
 ```
-sudo apt-get install python3.6
+$ sudo apt-get install python3.6
 ```
  
  #### Installer pip3 : 
@@ -59,4 +59,4 @@ $ export FLASK_APP=flaskapi.py
 $ flask run
 ```
 # Modifier le fichier de configuration de l'API:
-**Obligatoire, l'accès à la database sera impossible sinon. modifier [config.py](./resource/config.py) **
+**Obligatoire, l'accès à la database sera impossible sinon. modifier [config.py](./resource/config.py)**
