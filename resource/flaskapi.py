@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: latin-1 -*-
+
 import sqlalchemy
 from flask import Flask, jsonify, request
 from sqlalchemy import create_engine, text
-from flask_sqlalchemy import SQLAlchemy
 
-# TODO : config.py !
+import config as cfg
+
 app = Flask(__name__)
-# api = Api(app)
-eng = create_engine('mysql+pymysql://root:root@localhost:3306/exercices')
+eng = create_engine('mysql+pymysql://{}:{}@{}:{}/{}'.format(cfg.mysql['user'],
+                                                            cfg.mysql['passwd'],
+                                                            cfg.mysql['host'],
+                                                            cfg.mysql['port'],
+                                                            cfg.mysql['db']))
 
 
 def serialize_get_query(connection, query):
@@ -34,7 +38,7 @@ def error_json(custom=None):
     jsonish["result"] = []
     if custom:
         jsonish["result"] = str(custom)
-    return jsonify(jsonish)
+    return (jsonish)
 
 
 def success_json(**kwargs):
@@ -50,14 +54,16 @@ def success_json(**kwargs):
 @app.route('/allTitles/')
 def get_all_artitle():
     connection = eng.connect()
-    query = connection.execute("SELECT titre, id FROM article")
+    query = connection.execute(
+        "SELECT {}, {} FROM {}".format(cfg.mysql['title'], cfg.mysql['id'], cfg.mysql['article_table']))
     return serialize_get_query(connection, query)
 
 
 @app.route('/article/<id>')
 def get_this_article(id):
     connection = eng.connect()
-    query = connection.execute("SELECT * FROM article WHERE id={}".format(id))
+    query = connection.execute(
+        "SELECT * FROM {} WHERE {}={}".format(cfg.mysql['article_table'], cfg.mysql['id'], id))
     return serialize_get_query(connection, query)
 
 
@@ -74,19 +80,31 @@ def add_article():
             article = post_json[u'article']
         else:
             article = u'Ecrivez ici'
+
         titre = post_json[u'titre']
         query = connection.execute(
-            "INSERT INTO `article` (`id`, `article`, `titre`) VALUES "
-            "(NULL, \"{}\", \"{}\")".format(text(article), text(titre)))
+            "INSERT INTO `{}` (`{}`, `{}`, `{}`) VALUES "
+            "(NULL, \"{}\", \"{}\")".format(cfg.mysql['article_table'],
+                                            cfg.mysql['id'],
+                                            cfg.mysql['article'],
+                                            cfg.mysql['title'],
+                                            text(article),
+                                            text(titre)))
 
         id = connection.execute(
-            "SELECT `id` FROM `article` WHERE article=\"{}\" AND titre=\"{}\"".format(text(article), text(titre))
+            "SELECT `{}` FROM `{}` WHERE {}=\"{}\" AND {}=\"{}\"".format(
+                cfg.mysql['id'],
+                cfg.mysql['article_table'],
+                cfg.mysql['article'],
+                text(article),
+                cfg.mysql['title'],
+                text(titre))
         ).fetchall()
         connection.close()
 
-        dict_results = {'id': id, 'titre': titre, 'action': 'insert'}
+        dict_results = {'id': cfg.mysql['id'], 'titre': cfg.mysql['title'], 'action': 'add new'}
         if len(id) > 1:
-            dict_results['warning'] = 'multiple ({}) articles have the same title'.format(len(id))
+            dict_results['warning'] = "multiple ({}) articles have the same title".format(len(id))
 
     except sqlalchemy.exc.ProgrammingError as err:
         return error_json(err)
@@ -94,11 +112,19 @@ def add_article():
     return success_json(**dict_results)  # **dictionary access the **kwargs of the function
 
 
-@app.route('/delete/<id>')
-def delete_on_id(id):
+@app.route('/delete/', methods=['POST'])
+def delete_on_id():
+    post_json = request.get_json()
+    if 'id' not in post_json.keys():
+        return error_json(u'id is missing')
+    if type(post_json['id']) != int:  # anti injection
+        return error_json((u'id not an int'))
     connection = eng.connect()
     query = connection.execute(
-        "DELETE FROM `article` WHERE `id` = {}".format(int(str(id))))  # protection contre injection sql ?
+        "DELETE FROM `{}` WHERE `{}` = {}".format(
+            cfg.mysql['article_table'],
+            cfg.mysql['id'],
+            post_json['id']))  # protection contre injection sql ?
     return success_json(**{"action": "delete"})
 
 
@@ -116,8 +142,15 @@ def update_on_id():
     titre = post_json[u'titre']
     try:
         query = connection.execute(
-            "UPDATE `article` SET `article` = \"{}\", `titre` = \"{}\" WHERE `id` = {}"
-            .format(text(article), text(titre), id))
+            "UPDATE `{}` SET `{}` = \"{}\", `{}` = \"{}\" WHERE `id` = {}"
+                .format(
+                cfg.mysql['article_table'],
+                cfg.mysql['article'],
+                text(article),
+                cfg.mysql['title'],
+                text(titre),
+                cfg.mysql['id'],
+                id))
 
     except sqlalchemy.exc.ProgrammingError as err:
         return error_json(err)
