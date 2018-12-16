@@ -1,11 +1,5 @@
 # TP Front-Back Niveau 2 : Gestion d'Articles.
 
-## 1 / API : 
-
-L'api a été faite en utilisant Python 3.6, Flask (Micro framework populaire), SQLAlchemy (Boite à outils SQL pour Python)
-Il se trouve dans [./resource/flaskapi.py](./resource)
-> Un fichier de Config est en cours.
-
 ### How to Setup avec **ubuntu**:
 
 #### Installer Python 3.6
@@ -59,4 +53,4 @@ $ export FLASK_APP=flaskapi.py
 $ flask run
 ```
 # Modifier le fichier de configuration de l'API:
-**Obligatoire, l'accès à la database sera impossible sinon. modifier [config.py](./resource/config.py)**
+**Obligatoire, l'accès à la database sera impossible sinon. modifier [config_database.py](resources/config_database.py)**

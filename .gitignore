@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# nathan
+/resources/config_database.py
 # C extensions
 *.so
 
