@@ -3,12 +3,14 @@
 
 import sqlalchemy
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from sqlalchemy import create_engine, text
 import resources.config as cfg
 import resources.functions as f
 import resources.utils as u
 
 app = Flask(__name__)
+CORS(app=app)
 eng = create_engine('mysql+pymysql://{}:{}@{}:{}/{}'.format(cfg.mysql['user'],
                                                             cfg.mysql['passwd'],
                                                             cfg.mysql['host'],
