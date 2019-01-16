@@ -3,14 +3,14 @@
 
 import sqlalchemy
 from flask import Flask, jsonify, request
-from flask_cors import CORS
+# from flask_cors import CORS
 from sqlalchemy import create_engine, text
 import resources.config as cfg
 import resources.functions as f
 import resources.utils as u
 
 app = Flask(__name__)
-CORS(app=app)
+# CORS(app=app)
 eng = create_engine('mysql+pymysql://{}:{}@{}:{}/{}'.format(cfg.mysql['user'],
                                                             cfg.mysql['passwd'],
                                                             cfg.mysql['host'],
@@ -57,6 +57,12 @@ def main():
     else:
         return u.error_json("this method is not implemented : {}".format(request.method))
 
+
+@app.after_request
+def add_headers(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
