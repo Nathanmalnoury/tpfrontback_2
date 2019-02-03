@@ -3,14 +3,14 @@
 
 import sqlalchemy
 from flask import Flask, jsonify, request
-# from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from sqlalchemy import create_engine, text
 import resources.config as cfg
 import resources.functions as f
 import resources.utils as u
 
 app = Flask(__name__)
-# CORS(app=app)
+CORS(app=app)
 eng = create_engine('mysql+pymysql://{}:{}@{}:{}/{}'.format(cfg.mysql['user'],
                                                             cfg.mysql['passwd'],
                                                             cfg.mysql['host'],
@@ -20,6 +20,7 @@ eng = create_engine('mysql+pymysql://{}:{}@{}:{}/{}'.format(cfg.mysql['user'],
 
 # should be accessed by '/article/titre'
 @app.route('/article', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@cross_origin()
 def main():
     if request.method == 'GET':
         dict_request = u.url_parser(request.full_path)
@@ -55,14 +56,8 @@ def main():
             return f.delete_on_id(eng, cfg, post_json)
 
     else:
-        return u.error_json("this method is not implemented : {}".format(request.method))
+        return u.error_json(f"this method is not implemented : {request.method}")
 
-
-@app.after_request
-def add_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
